@@ -12,9 +12,13 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app=express()
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(",") 
+  : ["http://localhost:3000", "http://localhost:3001"];
+
 app.use(cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"], // Allow both client and admin ports if separate
-    credentials:true
+    origin: allowedOrigins,
+    credentials: true
 }))
 
 const port=process.env.PORT || 5000
