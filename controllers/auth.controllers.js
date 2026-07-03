@@ -30,11 +30,12 @@ export const signUp = async (req, res) => {
 
         const token = await genToken(user._id)
 
+        const isProduction = process.env.NODE_ENV === "production" || (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            sameSite: "strict",
-            secure: false
+            sameSite: isProduction ? "none" : "strict",
+            secure: isProduction
         })
 
         return res.status(201).json(user)
@@ -66,11 +67,12 @@ export const Login = async (req, res) => {
 
         const token = await genToken(user._id)
 
+        const isProduction = process.env.NODE_ENV === "production" || (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
         res.cookie("token", token, {
             httpOnly: true,
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            sameSite: "strict",
-            secure: false
+            sameSite: isProduction ? "none" : "strict",
+            secure: isProduction
         })
 
         return res.status(200).json(user)
