@@ -1,5 +1,6 @@
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
+import Product from "../models/product.model.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -48,6 +49,16 @@ export const createOrder = async (req, res) => {
 
     // Clear the cart on backend after order is created successfully
     await Cart.findOneAndUpdate({ userId }, { items: [] });
+
+    // Reduce stock
+    if (items && items.length > 0) {
+      for (const item of items) {
+        await Product.findOneAndUpdate(
+          { id: item.productId },
+          { $inc: { stock: -item.count, sold: item.count } }
+        );
+      }
+    }
 
     return res.status(201).json(newOrder);
   } catch (error) {

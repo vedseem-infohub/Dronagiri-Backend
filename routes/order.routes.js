@@ -6,6 +6,7 @@ import { createOrder, getOrders, getAllOrders, updateOrderStatus } from "../cont
 const orderRouter = express.Router();
 
 orderRouter.post("/", isAuth, createOrder);
+orderRouter.post("/cod", isAuth, createOrder);
 orderRouter.get("/", isAuth, getOrders);
 orderRouter.get("/all", isAdmin, getAllOrders);
 orderRouter.put("/:orderId/status", isAdmin, updateOrderStatus);

@@ -86,6 +86,19 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: "cod",
     },
+    paymentStatus: {
+      type: String,
+      default: "Pending",
+    },
+    razorpayOrderId: {
+      type: String,
+    },
+    razorpayPaymentId: {
+      type: String,
+    },
+    razorpaySignature: {
+      type: String,
+    },
     status: {
       type: String,
       default: "Order Sent to Admin",
