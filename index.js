@@ -16,7 +16,7 @@ const app = express()
 express.json();
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["http://localhost:3000", "http://localhost:3001", "https://dronagirifarms.co.in"];
+  : ["http://localhost:3000", "http://localhost:3001", "https://dronagirifarms.co.in","https://admin.dronagirifarms.co.in"];
 
 app.use(cors({
   origin: allowedOrigins,
