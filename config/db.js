@@ -26,15 +26,17 @@ const seedAdmin = async () => {
 };
 
 const connectDb = async () => {
-  
     try {
-        await mongoose.connect(process.env.MONGODB_URL)
-        console.log("db connected")
+        if (!process.env.MONGODB_URL) {
+            console.error("❌ MONGODB_URL is not defined in your environment variables (.env). Please verify .env file.");
+            return;
+        }
+        await mongoose.connect(process.env.MONGODB_URL);
+        console.log("db connected");
         await seedAdmin();
     } catch (error) {
-        console.log(error)
+        console.error("Database connection error:", error);
     }
-
 }
 
 export default connectDb;
