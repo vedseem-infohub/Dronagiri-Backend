@@ -11,11 +11,11 @@ import paymentRouter from "./routes/payment.routes.js";
 import cors from "cors"
 import cookieParser from "cookie-parser"
 
-const app = express()
-express.json();
+const app = express();
+app.set("trust proxy", 1);
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["http://localhost:3000", "http://localhost:3001", "https://dronagirifarms.co.in","https://admin.dronagirifarms.co.in"];
+  ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim().replace(/^["']|["']$/g, ""))
+  : ["http://localhost:3000", "http://localhost:3001", "https://dronagirifarms.co.in", "https://admin.dronagirifarms.co.in"];
 
 app.use(cors({
   origin: allowedOrigins,

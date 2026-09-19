@@ -3,12 +3,17 @@ import User from "../models/user.model.js";
 
 const isAdmin = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies?.token || (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.split(" ")[1] : null);
     if (!token) {
       return res.status(401).json({ message: "Unauthorized: Token not found" });
     }
 
-    const verifyToken = await jwt.verify(token, process.env.JWT_SECRET);
+    let verifyToken;
+    try {
+      verifyToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtErr) {
+      return res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+    }
     req.userId = verifyToken.userId;
 
     const user = await User.findById(req.userId);
@@ -20,7 +25,7 @@ const isAdmin = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("isAdmin middleware error:", error);
-    return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    return res.status(500).json({ message: "Internal server error in admin auth" });
   }
 };
 
