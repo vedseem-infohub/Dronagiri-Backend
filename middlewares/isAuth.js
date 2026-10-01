@@ -1,4 +1,4 @@
-import jwt  from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 
 const isAuth = async (req, res, next) => {
     try {
@@ -21,7 +21,7 @@ const isAuth = async (req, res, next) => {
         console.error("isAuth error:", error);
         return res.status(500).json({ message: "Internal server error in auth" });
     }
-  
+
 }
 
 export default isAuth

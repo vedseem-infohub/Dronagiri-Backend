@@ -71,5 +71,8 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+productSchema.index({ active: 1, createdAt: -1 });
+productSchema.index({ category: 1, active: 1, createdAt: -1 });
+
 const Product = mongoose.model("Product", productSchema);
 export default Product;
