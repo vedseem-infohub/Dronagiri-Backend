@@ -60,6 +60,10 @@ const orderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      pincode: {
+        type: String,
+        default: "",
+      },
     },
     items: [orderItemSchema],
     subtotal: {
@@ -103,9 +107,85 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: "Order Sent to Admin",
     },
+    internalStatus: {
+      type: String,
+      default: "ORDER_CREATED",
+      index: true,
+    },
+    shipmentRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Shipment",
+    },
+    invoiceNumber: {
+      type: String,
+      default: "",
+    },
     source: {
       type: String,
       default: "admin",
+    },
+    waybill: {
+      type: String,
+      index: true,
+      sparse: true,
+      default: "",
+    },
+    shipmentStatus: {
+      type: String,
+      default: "unfulfilled",
+    },
+    labelUrl: {
+      type: String,
+      default: "",
+    },
+    courierPartner: {
+      type: String,
+      default: "Delhivery",
+    },
+    shipping: {
+      courier: {
+        type: String,
+        default: "Delhivery",
+      },
+      waybill: {
+        type: String,
+        index: true,
+        sparse: true,
+      },
+      status: {
+        type: String,
+        default: "Unfulfilled",
+      },
+      statusDetails: {
+        type: String,
+        default: "",
+      },
+      labelDownloaded: {
+        type: Boolean,
+        default: false,
+      },
+      pickupScheduled: {
+        type: Boolean,
+        default: false,
+      },
+      pickupToken: {
+        type: String,
+        default: "",
+      },
+      estimatedDeliveryDate: {
+        type: Date,
+      },
+      trackingHistory: [
+        {
+          status: String,
+          statusDateTime: Date,
+          location: String,
+          instructions: String,
+        },
+      ],
+      lastTrackedAt: {
+        type: Date,
+      },
     },
   },
   {

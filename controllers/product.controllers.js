@@ -20,7 +20,14 @@ export const getProducts = async (req, res) => {
       filter.active = true;
     }
 
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    const products = await Product.find(filter).sort({ createdAt: -1 }).lean();
+
+    if (includeInactive === "true") {
+      res.set("Cache-Control", "no-store");
+    } else {
+      res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+    }
+
     return res.status(200).json(products);
   } catch (error) {
     return res.status(500).json({ message: `Get products error: ${error.message}` });
@@ -30,10 +37,11 @@ export const getProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findOne({ id: Number(id) });
+    const product = await Product.findOne({ id: Number(id) }).lean();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     return res.status(200).json(product);
   } catch (error) {
     return res.status(500).json({ message: `Get product error: ${error.message}` });
@@ -56,6 +64,16 @@ export const createProduct = async (req, res) => {
 
     if (!name || !category || !description) {
       return res.status(400).json({ message: "Name, category, and description are required" });
+    }
+
+    // Concurrency / Idempotency guard: Prevent duplicate product creation if submitted twice rapidly (< 5s)
+    const recentDuplicate = await Product.findOne({
+      name: { $regex: new RegExp(`^${name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+      category: category.trim(),
+      createdAt: { $gte: new Date(Date.now() - 5000) },
+    });
+    if (recentDuplicate) {
+      return res.status(200).json(recentDuplicate);
     }
 
     // Auto-increment numeric ID

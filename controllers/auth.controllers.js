@@ -30,16 +30,16 @@ export const signUp = async (req, res) => {
 
         const token = await genToken(user._id)
 
-        const isSecure = process.env.NODE_ENV === "production" || 
-                         req.secure || 
-                         req.headers["x-forwarded-proto"] === "https" ||
-                         (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
-        
+        const isSecure = process.env.NODE_ENV === "production" ||
+            req.secure ||
+            req.headers["x-forwarded-proto"] === "https" ||
+            (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
+
         res.cookie("token", token, {
             httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: 1 * 24 * 60 * 60 * 1000,
             sameSite: isSecure ? "none" : "lax",
-            secure: isSecure
+            secure: isSecure,
         })
 
         const userData = user.toObject ? user.toObject() : user;
@@ -70,16 +70,16 @@ export const Login = async (req, res) => {
 
         const token = await genToken(user._id)
 
-        const isSecure = process.env.NODE_ENV === "production" || 
-                         req.secure || 
-                         req.headers["x-forwarded-proto"] === "https" ||
-                         (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
-        
+        const isSecure = process.env.NODE_ENV === "production" ||
+            req.secure ||
+            req.headers["x-forwarded-proto"] === "https" ||
+            (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
+
         res.cookie("token", token, {
             httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: 1 * 24 * 60 * 60 * 1000,
             sameSite: isSecure ? "none" : "lax",
-            secure: isSecure
+            secure: isSecure,
         })
 
         const userData = user.toObject ? user.toObject() : user;
@@ -93,10 +93,10 @@ export const Login = async (req, res) => {
 
 export const LogOut = async (req, res) => {
     try {
-        const isSecure = process.env.NODE_ENV === "production" || 
-                         req.secure || 
-                         req.headers["x-forwarded-proto"] === "https" ||
-                         (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
+        const isSecure = process.env.NODE_ENV === "production" ||
+            req.secure ||
+            req.headers["x-forwarded-proto"] === "https" ||
+            (process.env.ALLOWED_ORIGINS && !process.env.ALLOWED_ORIGINS.includes("localhost"));
         res.clearCookie("token", {
             httpOnly: true,
             sameSite: isSecure ? "none" : "lax",

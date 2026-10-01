@@ -3,6 +3,8 @@ import crypto from "crypto";
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
 import Product from "../models/product.model.js";
+import Coupon from "../models/coupon.model.js";
+import { createShipment } from "../services/delhivery.js";
 
 // Utility to reduce stock
 const reduceStock = async (items) => {
@@ -107,6 +109,7 @@ export const verifyPayment = async (req, res) => {
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,
       status: "Order Sent to Admin",
+      internalStatus: "PAYMENT_CONFIRMED",
       source: source || "admin",
     });
 
@@ -115,8 +118,45 @@ export const verifyPayment = async (req, res) => {
       await reduceStock(items);
     }
 
+    // Increment coupon usage count if coupon applied
+    if (promoCode) {
+      try {
+        await Coupon.findOneAndUpdate(
+          { code: promoCode.trim().toUpperCase() },
+          { $inc: { usedCount: 1 } }
+        );
+      } catch (couponErr) {
+        console.warn("Could not increment coupon usage:", couponErr.message);
+      }
+    }
+
     // Clear the cart on backend after order is created successfully
-    await Cart.findOneAndUpdate({ userId }, { items: [] });
+    if (userId) {
+      await Cart.findOneAndUpdate({ userId }, { items: [] });
+    }
+
+    // Generate Delhivery shipment & Waybill (AWB) for prepaid order
+    try {
+      const shipResult = await createShipment({
+        orderId,
+        customer,
+        items,
+        total,
+        paymentMethod: "online",
+        weight: (items || []).reduce((sum, i) => sum + (Number(i.count) || 1) * 500, 0),
+        _id: newOrder._id,
+      });
+
+      if (shipResult.success && shipResult.data?.waybill) {
+        const refreshedOrder = await Order.findById(newOrder._id);
+        return res.status(201).json({
+          message: "Payment verified successfully",
+          order: refreshedOrder || newOrder,
+        });
+      }
+    } catch (shipErr) {
+      console.warn("[Delhivery Prepaid] Auto shipment creation note:", shipErr.message);
+    }
 
     return res.status(201).json({ message: "Payment verified successfully", order: newOrder });
   } catch (error) {
